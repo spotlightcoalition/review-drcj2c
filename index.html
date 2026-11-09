@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}</style>
+<title>Ten songs, mastered for release</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Two tabs: Listen (one shared A/B player, one song loaded at a time, always level-matched) and What changed (per-song notes). */
+:root {
+  --bg: #eef0f3; --surface: #ffffff; --fg: #14171c; --muted: #5a616d; --line: #d6dae1;
+  --orig: #7c818b; --orig-soft: #eceef1; --mast: #2350d4; --mast-soft: #e3eafc;
+  --display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1115; --surface: #171a20; --fg: #e9ebef; --muted: #9ba2ae; --line: #2a2f38;
+  --orig: #a5abb5; --orig-soft: #22262d; --mast: #7095ff; --mast-soft: #1c2640; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0f1115; --surface: #171a20; --fg: #e9ebef; --muted: #9ba2ae; --line: #2a2f38;
+  --orig: #a5abb5; --orig-soft: #22262d; --mast: #7095ff; --mast-soft: #1c2640; color-scheme: dark }
+
+body { background: var(--bg); color: var(--fg); font-family: var(--display); font-size: 15px; line-height: 1.55; }
+.wrap { max-width: 800px; margin: 0 auto; padding-block: 44px 72px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 22px; }
+.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+h1 { margin: 4px 0 0; font-stretch: 112%; font-weight: 780; font-size: clamp(30px, 6vw, 46px); line-height: 1.03; text-wrap: balance; }
+h2 { margin: 0; font-stretch: 108%; font-size: 18px; font-weight: 720; }
+h3 { margin: 0; font-stretch: 108%; font-size: 20px; font-weight: 740; line-height: 1.2; }
+.lede { margin: 10px 0 0; max-width: 62ch; font-size: 16.5px; color: var(--muted); }
+
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); }
+.tab { appearance: none; font: inherit; font-weight: 650; font-size: 15.5px; color: var(--muted); background: none; border: 0;
+  border-bottom: 3px solid transparent; padding: 10px 14px 9px; cursor: pointer; margin-bottom: -1px; }
+.tab[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--mast); }
+.tab:focus-visible, .side:focus-visible, .play:focus-visible, .song:focus-visible, .jump:focus-visible { outline: 3px solid var(--mast); outline-offset: 2px; }
+[role="tabpanel"] { display: grid; gap: 18px; }
+[role="tabpanel"][hidden] { display: none; }
+
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; display: grid; gap: 16px; min-width: 0; }
+.player { position: sticky; top: 8px; z-index: 2; box-shadow: 0 6px 24px rgb(0 0 0 / .06); }
+.now { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; min-width: 0; }
+.now b { font-stretch: 108%; font-size: 17px; font-weight: 720; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.now span { font-family: var(--mono); font-size: 12px; color: var(--muted); white-space: nowrap; }
+.ab { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.side { appearance: none; font: inherit; color: inherit; text-align: left; cursor: pointer; border: 2px solid var(--line); border-radius: 12px;
+  background: var(--surface); padding: 12px 14px; display: grid; gap: 2px; }
+.side b { font-stretch: 112%; font-size: 20px; font-weight: 760; line-height: 1.1; }
+.side span { font-size: 13px; color: var(--muted); }
+.side[data-who="src"][aria-pressed="true"] { border-color: var(--orig); background: var(--orig-soft); }
+.side[data-who="mst"][aria-pressed="true"] { border-color: var(--mast); background: var(--mast-soft); }
+.side[data-who="mst"][aria-pressed="true"] b { color: var(--mast); }
+.transport { display: flex; align-items: center; gap: 14px; }
+.play { appearance: none; border: 0; cursor: pointer; width: 52px; height: 52px; border-radius: 50%; background: var(--fg); color: var(--bg); display: grid; place-items: center; flex: none; }
+.play:disabled { opacity: .35; cursor: progress; }
+.play svg { width: 20px; height: 20px; fill: currentColor; }
+#seek { flex: 1; min-width: 0; accent-color: var(--mast); }
+.time { font-family: var(--mono); font-size: 13.5px; font-variant-numeric: tabular-nums; color: var(--muted); white-space: nowrap; }
+.status { font-size: 13px; color: var(--muted); margin: -6px 0 0; }
+.hint { font-size: 13px; color: var(--muted); margin: -8px 0 0; }
+.phone-hint { display: none; font-size: 13px; color: var(--muted); margin: -8px 0 0; }
+@media (pointer: coarse) { .phone-hint { display: block; } .hint { display: none; } }
+kbd { font-family: var(--mono); font-size: 11px; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; color: var(--fg); }
+
+.songs { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.song { appearance: none; font: inherit; color: inherit; width: 100%; text-align: left; cursor: pointer; background: var(--surface);
+  border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; display: grid; grid-template-columns: 2.2em 1fr auto; gap: 10px; align-items: center; }
+.song .n { font-family: var(--mono); font-size: 12.5px; color: var(--muted); }
+.song .t { font-weight: 620; min-width: 0; }
+.song .d { font-family: var(--mono); font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.song[aria-current="true"] { border-color: var(--mast); background: var(--mast-soft); }
+.song[aria-current="true"] .n { color: var(--mast); }
+
+.every { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+.every li { max-width: 66ch; }
+article.notes { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; display: grid; gap: 14px; min-width: 0; }
+.notes .head { display: flex; gap: 12px; align-items: baseline; }
+.notes .head span { font-family: var(--mono); font-size: 12.5px; color: var(--mast); }
+.notes p { margin: 0; max-width: 66ch; }
+.figs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 16px; margin: 0; }
+.fig { display: grid; gap: 2px; padding: 8px 0; border-top: 1px solid var(--line); min-width: 0; }
+.fig dt { font-size: 11.5px; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; }
+.fig dd { margin: 0; font-family: var(--mono); font-size: 14px; font-variant-numeric: tabular-nums; }
+.fig dd b { color: var(--mast); font-weight: 500; }
+.notes h4 { margin: 4px 0 0; font-size: 14px; font-weight: 700; }
+.notes ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+.notes ul li { max-width: 64ch; }
+.marks { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.marks li { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: baseline; }
+.jump { appearance: none; font: inherit; font-family: var(--mono); font-size: 13px; cursor: pointer; color: var(--mast); background: var(--mast-soft);
+  border: 1px solid transparent; border-radius: 6px; padding: 1px 8px; }
+.key { font-size: 13px; color: var(--muted); margin: 0; max-width: 66ch; }
+footer { font-size: 13px; color: var(--muted); }
+@media (max-width: 640px) { .figs { grid-template-columns: 1fr; } .song { grid-template-columns: 2em 1fr auto; padding: 11px 12px; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow" id="studio"></div>
+    <h1 id="title"></h1>
+    <p class="lede" id="intro"></p>
+  </header>
+
+  <div class="tabs" role="tablist" aria-label="Page sections">
+    <button class="tab" role="tab" id="tab-listen" aria-controls="listen" aria-selected="true">Listen</button>
+    <button class="tab" role="tab" id="tab-changes" aria-controls="changes" aria-selected="false" tabindex="-1">What changed</button>
+  </div>
+
+  <section role="tabpanel" id="listen" aria-labelledby="tab-listen">
+    <div class="panel player" aria-label="Player">
+      <div class="now"><b id="nowTitle">Choose a song</b><span id="nowNum"></span></div>
+      <div class="ab" role="group" aria-label="Choose version">
+        <button class="side" data-who="src" aria-pressed="false"><b>Original</b><span>the file as it came in</span></button>
+        <button class="side" data-who="mst" aria-pressed="true"><b>Master</b><span>the version for release</span></button>
+      </div>
+      <div class="transport">
+        <button class="play" id="play" disabled aria-label="Play"><svg viewBox="0 0 20 20" id="icon"><path d="M5 3l12 7-12 7z"/></svg></button>
+        <input type="range" id="seek" min="0" max="1000" value="0" aria-label="Position in the song">
+        <div class="time" id="time">0:00 / 0:00</div>
+      </div>
+      <p class="status" id="status" role="status">Pick a song below.</p>
+      <p class="hint"><kbd>Space</kbd> play or pause · <kbd>S</kbd> switch between original and master</p>
+      <p class="phone-hint">On iPhone or iPad, turn off silent mode to hear the audio.</p>
+    </div>
+    <ol class="songs" id="songs"></ol>
+  </section>
+
+  <section role="tabpanel" id="changes" aria-labelledby="tab-changes" hidden>
+    <div class="panel">
+      <h2>Done on every song</h2>
+      <ul class="every" id="every"></ul>
+      <p class="key">Each song below lists three figures, original first. Loudness is the average level in LUFS (closer to zero is louder). Peak is the highest point in dBTP, where 0 is the maximum. Each master keeps it at least 2 dB below that, to leave room for the small overshoot that streaming encoding adds. Range is how far the quiet parts sit below the loud ones, in LU.</p>
+    </div>
+    <div id="notes" style="display:grid;gap:14px"></div>
+  </section>
+
+  <footer>Both versions of every song play at the same overall volume, so you hear mostly the difference in sound rather than in level.</footer>
+</div>
+
+<script type="application/json" id="data">{"title": "Ten songs, mastered for release", "studio": "Jose, on behalf of Arthur D.", "intro": "Every song is here twice: the original file you sent and my master, the version ready for release. Pick a song and switch between Original and Master as often as you like. Both play at the same overall volume, so the difference you hear is mostly in the sound itself; quiet passages in the master can sit a little louder than in the original, and the loudest parts a little quieter. The second tab explains what I changed in each song and where to listen.", "every_master": ["Raised every song to the same average level, −11 LUFS, so the songs sit evenly next to each other.", "Kept the highest peaks at least 2 dB below the maximum, which leaves room for the small overshoot that streaming encoding adds. At Apple Music's standard quality every song stays below the maximum; on Apple Music's data-saving setting some songs still go slightly over.", "Centred the deepest bass so it holds up on phones, laptops and mono speakers.", "Turned the very top (above about 16 kHz) down slightly. On eight songs it ends up a little softer than in the original; on 'Behold, I make all things new' and 'I can hope to be a saint' it ends up about where it was, and on 'Behold' a touch brighter in the sparse opening.", "Added controls that soften harsh notes and sharp 's' sounds only at the moments they happen, leaving the rest of each song alone.", "Gave each song a clean start and let it end in silence."], "match_lufs": -15.0, "songs": [{"title": "On the Road to Emmaus", "summary": "A long song that builds into a louder second half. I kept that build and changed the tone only a little.", "changes": ["A small, wide cut around 630 Hz, where the song had its biggest build-up.", "A gentle fade on the first tenth of a second, which softens a short burst of sound right at the start.", "A 2 second fade at the very end, over the last chord as it dies away, so the song ends in clean silence."], "listen_for": [{"at": "0:32", "t": 32, "text": "A quieter verse. Check that it still sounds natural next to the original."}, {"at": "2:42", "t": 162, "text": "The loudest stretch, where the master works hardest."}, {"at": "5:36", "t": 336, "text": "The last chord and the fade into silence."}], "duration": 343.58, "stats": {"src": {"lufs": -15.9, "tp": -3.1, "lra": 7.4}, "mst": {"lufs": -11.0, "tp": -2.2, "lra": 6.2}}, "audio": {"src": "audio/01-original.mp4", "mst": "audio/01-master.mp4"}, "gain": {"src": 0.0, "mst": 0.0}}, {"title": "Fr. Chad Ripperger - Behold, I make all things new", "summary": "A song with a sparse, quiet opening and much fuller later sections. I kept that contrast and changed the overall tone very little.", "changes": ["A small, wide cut around 280 Hz, where the low pad and the lower notes piled up, especially in the sparse opening. After the rest of the processing, that range sits about where it did in the original at the same volume.", "My first version shaped the peaks harder, and one hit around 2:10 came too close to the maximum once encoded for streaming at a lower quality. I eased that stage off, and the master you hear passes that test.", "A long 8 second fade at the end. The original has a faint click at 4:20, after the music has died away; the fade turns it down but does not remove it."], "listen_for": [{"at": "0:17", "t": 17, "text": "The sparse opening."}, {"at": "3:23", "t": 203, "text": "The loudest stretch."}, {"at": "4:12", "t": 252, "text": "The ending, and the faint click at 4:20."}], "duration": 264.46, "stats": {"src": {"lufs": -16.0, "tp": -3.8, "lra": 9.7}, "mst": {"lufs": -11.0, "tp": -2.2, "lra": 8.7}}, "audio": {"src": "audio/02-original.mp4", "mst": "audio/02-master.mp4"}, "gain": {"src": 0.1, "mst": 0.0}}, {"title": "Amy Carmichael - Broken Reed", "summary": "A song with a strong middle range and quiet passages between full, loud ones. I thinned out the middle a little and kept the quiet passages quiet.", "changes": ["A cut centred around 900 Hz, the range where the original had the most build-up, spread wide enough to leave the sung line intact.", "Softened the very top, where a thin shimmer rose with the loud sections.", "I chose this version from the four closest because it kept the most room below the maximum when encoded at the lower streaming quality I test against."], "listen_for": [{"at": "0:20", "t": 20, "text": "A quiet passage. It should feel as calm as in the original."}, {"at": "1:42", "t": 102, "text": "One of the full sections."}, {"at": "3:24", "t": 204, "text": "The loudest moment of the song."}], "duration": 254.34, "stats": {"src": {"lufs": -15.5, "tp": -3.3, "lra": 7.1}, "mst": {"lufs": -11.0, "tp": -2.4, "lra": 6.1}}, "audio": {"src": "audio/03-original.mp4", "mst": "audio/03-master.mp4"}, "gain": {"src": 0.1, "mst": 0.0}}, {"title": "Prayer of Command (I beseech thee)", "summary": "A song with a quiet opening and several loud stretches, and a lot of energy in the middle of the sound. I cleared some of that middle and softened the top more than on the other songs.", "changes": ["A wide cut centred around 560 Hz, where the original had the biggest build-up, mostly around 500 to 630 Hz.", "A stronger softening of the very top than on most of the other songs, because the shimmer up there rose with the loud stretches."], "listen_for": [{"at": "0:34", "t": 34, "text": "The quiet opening."}, {"at": "1:50", "t": 110, "text": "The first loud stretch."}, {"at": "3:14", "t": 194, "text": "One of the two loudest stretches."}], "duration": 237.22, "stats": {"src": {"lufs": -16.1, "tp": -3.1, "lra": 9.1}, "mst": {"lufs": -11.0, "tp": -2.2, "lra": 7.0}}, "audio": {"src": "audio/04-original.mp4", "mst": "audio/04-master.mp4"}, "gain": {"src": 0.0, "mst": 0.0}}, {"title": "St. Therèse - I can hope to be a saint", "summary": "A gentle song with a very soft top end. The main issue was the low end: its left and right channels partly worked against each other, so it could thin out on a phone or mono speaker.", "changes": ["Centred the low end up to 250 Hz, higher than on the other songs. On a phone or mono speaker the bass and low notes now come through a little over 1 dB fuller than in the original. On headphones and stereo speakers the low end is lighter: the 60 to 150 Hz range is about 2 dB below the original over the whole song, and in places much more. Some low notes whose left and right channels worked against each other in the original are much quieter: by about 5 dB around 0:32, and by up to about 10 dB in two short moments between 1:06 and 1:18.", "Left the top almost as it was. This song had very little shimmer to begin with.", "Controls on the sharp 's' sounds, which are strong in this recording."], "listen_for": [{"at": "0:00", "t": 0, "text": "The quiet opening."}, {"at": "1:06", "t": 66, "text": "Low notes that sound very wide in the original. On headphones the master is much lighter here; on a phone speaker it is a little fuller."}, {"at": "1:30", "t": 90, "text": "The bass and low notes. Try this on a phone speaker and on headphones, switching between the two versions."}, {"at": "3:12", "t": 192, "text": "The loudest stretch."}], "duration": 218.34, "stats": {"src": {"lufs": -15.4, "tp": -3.5, "lra": 7.0}, "mst": {"lufs": -11.0, "tp": -2.2, "lra": 7.3}}, "audio": {"src": "audio/05-original.mp4", "mst": "audio/05-master.mp4"}, "gain": {"src": 0.0, "mst": 0.0}}, {"title": "Heaven Speaks to Those Rejecting God", "summary": "A stern song that builds to a loud final section. I left the voice where it was and gave the song a firmer hold, so the final section stays steady.", "changes": ["No cut in the voice range. I tried one, and it set the voice slightly further back.", "Firmer compression than on most of the other songs, to hold the loud last section together.", "The original stops in the middle of its last note. A 2 second fade turns that stop into a short ending."], "listen_for": [{"at": "0:15", "t": 15, "text": "The quiet introduction."}, {"at": "3:14", "t": 194, "text": "The loudest stretch, in the final section."}, {"at": "3:23", "t": 203, "text": "The ending. The original stops mid-note; the master fades out over it."}], "duration": 208.06, "stats": {"src": {"lufs": -16.9, "tp": -3.2, "lra": 9.3}, "mst": {"lufs": -11.0, "tp": -2.2, "lra": 7.9}}, "audio": {"src": "audio/06-original.mp4", "mst": "audio/06-master.mp4"}, "gain": {"src": 0.1, "mst": 0.0}}, {"title": "Thomas Aquinas - Pange Lingua", "summary": "The longest song in the set, with a full middle range and a long slow arc. I cleared a little of the middle and kept the arc.", "changes": ["A gentle, wide cut centred around 800 Hz, where the song had its biggest build-up.", "Firmer compression than on most of the other songs, to hold the two long loud sections together.", "The original file stops while its last sound is still fading. I added a half-second fade over that last faint moment so the song ends in silence. The fade touches only that moment; the rest of the ending is as in the original."], "listen_for": [{"at": "4:08", "t": 248, "text": "The quiet break before the last section."}, {"at": "5:20", "t": 320, "text": "The loudest stretch."}, {"at": "6:03", "t": 363, "text": "The ending."}], "duration": 369.26, "stats": {"src": {"lufs": -15.8, "tp": -3.3, "lra": 6.5}, "mst": {"lufs": -11.0, "tp": -2.2, "lra": 5.4}}, "audio": {"src": "audio/07-original.mp4", "mst": "audio/07-master.mp4"}, "gain": {"src": 0.1, "mst": 0.0}}, {"title": "Kleine krijger", "summary": "The original sat dark and heavy, with the voice a little buried. I brought the voice forward and softened the very top.", "changes": ["A lift in the vocal range: 2 to 5 kHz is +2.1 dB against the original, so the words come through more clearly.", "The upper bass kept full on purpose. Every bass cut I tried made everything above the bass louder while barely changing the bass itself.", "The top softened, with an extra control that turns it down most in the quiet passages, where the thin shimmer up there was easiest to hear.", "The original file stops before its last sound has died away. A 2 second fade over that sound lets the song end in silence, a little sooner than the original."], "listen_for": [{"at": "1:29", "t": 89, "text": "The loudest stretch. Switch back and forth to hear the voice come forward."}, {"at": "2:08", "t": 128, "text": "A quiet passage, where the top of the sound is softened most."}, {"at": "2:26", "t": 146, "text": "The ending."}], "duration": 153.06, "stats": {"src": {"lufs": -16.2, "tp": -2.4, "lra": 9.4}, "mst": {"lufs": -11.0, "tp": -2.2, "lra": 8.1}}, "audio": {"src": "audio/08-original.mp4", "mst": "audio/08-master.mp4"}, "gain": {"src": 0.0, "mst": 0.0}}, {"title": "Thomas Kempis - We bless the Lord in pain", "summary": "A dense song with little difference between its quiet and loud parts. I kept its shape, added very little compression and cleared a slightly boxy middle.", "changes": ["A small, wide cut centred around 710 Hz, where the long sung notes made the middle a little boxy.", "Controls that soften harsh moments around 3 kHz in the loudest choruses, and sharp 's' sounds and hi-hats.", "The original stops sharply on its last note at about 3:19 and has a faint click just after it. The master keeps that sudden stop; a 3 second fade turns the click down."], "listen_for": [{"at": "0:31", "t": 31, "text": "The quiet verse."}, {"at": "3:01", "t": 181, "text": "The loudest stretch."}, {"at": "3:16", "t": 196, "text": "The ending."}], "duration": 201.34, "stats": {"src": {"lufs": -15.8, "tp": -4.3, "lra": 6.1}, "mst": {"lufs": -11.0, "tp": -2.2, "lra": 5.5}}, "audio": {"src": "audio/09-original.mp4", "mst": "audio/09-master.mp4"}, "gain": {"src": 0.0, "mst": 0.0}}, {"title": "Thomas Aquinas - Grant me a heart to seek you", "summary": "A warm, dark song with a wide low pad, a slow build and its own gentle ending. I kept all three and made the voice a little clearer.", "changes": ["A broad lift around 3.2 kHz for vocal clarity: 2 to 5 kHz is +1.5 dB against the original.", "The warmth in the lower middle kept on purpose. Cutting it mainly made the top end louder rather than the middle clearer.", "Only the very deepest bass (below about 110 Hz) centred, so the low pad keeps most of its width. On a phone or mono speaker part of the pad thins out, as it does in the original.", "The song's own fade-out kept, with only its last second smoothed into silence."], "listen_for": [{"at": "0:00", "t": 0, "text": "The quiet opening."}, {"at": "2:29", "t": 149, "text": "The climax, the loudest part of the song."}, {"at": "3:10", "t": 190, "text": "The gentle ending."}], "duration": 204.02, "stats": {"src": {"lufs": -15.9, "tp": -4.5, "lra": 9.3}, "mst": {"lufs": -11.0, "tp": -2.2, "lra": 8.4}}, "audio": {"src": "audio/10-original.mp4", "mst": "audio/10-master.mp4"}, "gain": {"src": 0.1, "mst": 0.0}}]}</script>
+<script>
+(() => {
+  const D = JSON.parse(document.getElementById('data').textContent);
+  const $ = id => document.getElementById(id);
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const num = v => (Number(v) < 0 ? '−' : Number(v) > 0 ? '+' : '') + Math.abs(Number(v));
+  const fmt = t => { t = Math.max(0, t || 0); return Math.floor(t / 60) + ':' + String(Math.floor(t % 60)).padStart(2, '0'); };
+
+  $('studio').textContent = 'Mastered by ' + D.studio;
+  $('title').textContent = D.title;
+  $('intro').textContent = D.intro;
+  for (const t of D.every_master) $('every').append(el('li', null, t));
+
+  // Tabs
+  const tabs = [...document.querySelectorAll('.tab')];
+  function showTab(id, focus) {
+    for (const t of tabs) {
+      const on = t.getAttribute('aria-controls') === id;
+      t.setAttribute('aria-selected', on); t.tabIndex = on ? 0 : -1; $(t.getAttribute('aria-controls')).hidden = !on;
+      if (on && focus) t.focus();
+    }
+    try { history.replaceState(null, '', '#' + id); } catch (e) {}
+  }
+  tabs.forEach((t, i) => {
+    t.addEventListener('click', () => showTab(t.getAttribute('aria-controls')));
+    t.addEventListener('keydown', e => { if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { const n = tabs[(i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length]; showTab(n.getAttribute('aria-controls'), true); } });
+  });
+  if (location.hash === '#changes') showTab('changes');
+
+  // Song list and notes
+  D.songs.forEach((s, i) => {
+    const li = el('li'); const b = el('button', 'song'); b.dataset.i = i;
+    b.append(el('span', 'n', String(i + 1).padStart(2, '0')), el('span', 't', s.title), el('span', 'd', fmt(s.duration)));
+    b.addEventListener('click', () => load(i, 0, true)); li.append(b); $('songs').append(li);
+
+    const a = el('article', 'notes'); a.id = 'song-' + (i + 1);
+    const head = el('div', 'head'); head.append(el('span', null, String(i + 1).padStart(2, '0')), el('h3', null, s.title)); a.append(head);
+    a.append(el('p', null, s.summary));
+    const figs = el('dl', 'figs');
+    for (const [label, k, unit] of [['Loudness', 'lufs', 'LUFS'], ['Peak', 'tp', 'dBTP'], ['Range', 'lra', 'LU']]) {
+      const f = el('div', 'fig'); f.append(el('dt', null, label));
+      const dd = el('dd'); dd.append(document.createTextNode(num(s.stats.src[k]) + ' → '), el('b', null, num(s.stats.mst[k]) + ' ' + unit));
+      f.append(dd); figs.append(f);
+    }
+    a.append(figs);
+    a.append(el('h4', null, 'What I changed'));
+    const ul = el('ul'); for (const c of s.changes) ul.append(el('li', null, c)); a.append(ul);
+    a.append(el('h4', null, 'Listen for'));
+    const marks = el('ul', 'marks');
+    for (const m of s.listen_for) {
+      const row = el('li'); const j = el('button', 'jump', m.at); j.setAttribute('aria-label', 'Play ' + s.title + ' from ' + m.at);
+      j.addEventListener('click', () => { showTab('listen'); load(i, m.t, true); window.scrollTo({ top: 0, behavior: 'smooth' }); });
+      row.append(j, el('span', null, m.text)); marks.append(row);
+    }
+    a.append(marks);
+    $('notes').append(a);
+  });
+
+  // Audio: one song at a time; both versions decoded and run in lockstep at the same volume; switching crossfades 15 ms at the same spot.
+  const playBtn = $('play'), icon = $('icon'), status = $('status'), timeEl = $('time'), seekEl = $('seek');
+  const AC = window.AudioContext || window.webkitAudioContext; let ctx = null, sel, lvl;
+  let buf = {}, srcs = {}, playing = false, offset = 0, startAt = 0, active = 'mst', DUR = 0, dragging = false, cur = -1, token = 0;
+  function setup() {
+    if (ctx) return; ctx = new AC();
+    sel = { src: ctx.createGain(), mst: ctx.createGain() }; lvl = { src: ctx.createGain(), mst: ctx.createGain() };
+    for (const k of ['src', 'mst']) { sel[k].connect(lvl[k]); lvl[k].connect(ctx.destination); }
+    sel.src.gain.value = active === 'src' ? 1 : 0; sel.mst.gain.value = active === 'mst' ? 1 : 0;
+  }
+  async function load(i, at, autoplay) {
+    setup(); ctx.resume();
+    if (i === cur && DUR) { seek(at); if (autoplay && !playing) toggle(); return; }
+    const my = ++token; if (playing) { stop(); playing = false; setIcon(); }
+    buf = {}; DUR = 0; offset = at || 0; cur = i; playBtn.disabled = true;
+    const s = D.songs[i];
+    $('nowTitle').textContent = s.title; $('nowNum').textContent = String(i + 1).padStart(2, '0') + ' / ' + String(D.songs.length).padStart(2, '0');
+    document.querySelectorAll('.song').forEach(b => b.setAttribute('aria-current', Number(b.dataset.i) === i));
+    status.textContent = 'Loading ' + s.title + '…'; tick(true);
+    try {
+      const got = {};
+      await Promise.all(['src', 'mst'].map(async k => {
+        const r = await fetch(s.audio[k]); if (!r.ok) throw new Error(s.audio[k] + ' ' + r.status);
+        const ab = await r.arrayBuffer(); got[k] = await new Promise((res, rej) => ctx.decodeAudioData(ab, res, rej));
+      }));
+      if (my !== token) return;  // another song was chosen while this one loaded
+      buf = got; for (const k of ['src', 'mst']) lvl[k].gain.value = Math.pow(10, s.gain[k] / 20);
+      DUR = Math.max(buf.src.duration, buf.mst.duration); offset = Math.min(offset, DUR - 0.1);
+      playBtn.disabled = false; status.textContent = 'Ready.'; tick(true);
+      if (autoplay) start();
+    } catch (e) { if (my === token) { status.textContent = 'Couldn’t load the audio. Reload the page to try again.'; console.error(e); } }
+  }
+  const pos = () => playing ? Math.min(DUR, ctx.currentTime - startAt) : offset;
+  function start() { const when = ctx.currentTime + 0.05; for (const k of ['src', 'mst']) { const s = ctx.createBufferSource(); s.buffer = buf[k]; s.connect(sel[k]); if (offset < buf[k].duration) s.start(when, offset); srcs[k] = s; } startAt = when - offset; playing = true; setIcon(); }
+  function stop() { for (const k in srcs) { try { srcs[k].stop(); } catch (e) {} srcs[k].disconnect(); } srcs = {}; }
+  function toggle() { if (playBtn.disabled) return; ctx.resume(); if (playing) { offset = pos(); stop(); playing = false; setIcon(); } else { if (offset >= DUR - 0.05) offset = 0; start(); } }
+  function seek(t) { if (!DUR) return; t = Math.max(0, Math.min(DUR - 0.1, t)); if (playing) { stop(); offset = t; start(); } else offset = t; tick(true); }
+  function choose(k) {
+    active = k;
+    if (ctx) { const n = ctx.currentTime; for (const x of ['src', 'mst']) { const g = sel[x].gain; g.cancelScheduledValues(n); g.setValueAtTime(g.value, n); g.linearRampToValueAtTime(x === k ? 1 : 0, n + 0.015); } }
+    document.querySelectorAll('.side').forEach(b => b.setAttribute('aria-pressed', b.dataset.who === k));
+  }
+  function setIcon() { icon.innerHTML = playing ? '<path d="M5 3h4v14H5zM11 3h4v14h-4z"/>' : '<path d="M5 3l12 7-12 7z"/>'; playBtn.setAttribute('aria-label', playing ? 'Pause' : 'Play'); }
+  function tick(once) {
+    if (playing && pos() >= DUR) { stop(); playing = false; offset = 0; setIcon(); }
+    const t = pos(); timeEl.textContent = fmt(t) + ' / ' + fmt(DUR);
+    if (!dragging && DUR) seekEl.value = Math.round(t / DUR * 1000);
+    if (once !== true) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+  playBtn.addEventListener('click', toggle);
+  document.querySelectorAll('.side').forEach(b => b.addEventListener('click', () => choose(b.dataset.who)));
+  seekEl.addEventListener('input', () => { dragging = true; timeEl.textContent = fmt(seekEl.value / 1000 * DUR) + ' / ' + fmt(DUR); });
+  seekEl.addEventListener('change', () => { dragging = false; seek(seekEl.value / 1000 * DUR); });
+  window.addEventListener('keydown', e => {
+    if (e.target.closest && e.target.closest('input,textarea,[role="tab"]')) return;
+    const k = e.key.toLowerCase();
+    if (k === ' ') { if (cur < 0) return; e.preventDefault(); toggle(); } else if (k === 's') choose(active === 'src' ? 'mst' : 'src');
+    else if (k === 'arrowleft') seek(pos() - 5); else if (k === 'arrowright') seek(pos() + 5);
+  });
+})();
+</script>
